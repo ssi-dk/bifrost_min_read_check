@@ -14,21 +14,20 @@ def parse_args():
     """
     Arg parsing via argparse
     """
-    parser = argparse.ArgumentParser()
-    parser.description = 'Runs bifrost component ariba mlst given a SampleID'
+    parser = argparse.ArgumentParser(description='Runs bifrost component ariba mlst given a SampleID')
     parser.add_argument('-id', '--sample_id',
                         action='store',
                         type=str,
-                        required=True,
-                        func=run_sample,
                         help='Sample ID of sample in bifrost, sample has already been added to the bifrost DB')
     parser.add_argument('-info', '--info',
                         action='store_true',
-                        type=bool,
-                        func=show_info,
                         help='Provides basic information on component')
     args = parser.parse_args()
-    args.func(args)
+    print(args)
+    if args.info:
+        show_info()
+    if args.id:
+        run_sample(args)
 
 
 def show_info():
