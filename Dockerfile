@@ -15,4 +15,4 @@ RUN \
 
 ADD https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
 
-CMD [ "/bifrost/min_read_check/launcher.py" ]
+CMD [ "/bifrost/bifrost-min_read_check/launcher.py" ]
