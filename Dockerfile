@@ -9,12 +9,12 @@ LABEL \
     maintainer="kimn@ssi.dk;"
 
 RUN \
-    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58;
+    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; \
+    cd bifrost; \
+    git clone https://github.com/ssi-dk/bifrost-min_read_check.git
 
 ADD https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
-ADD https://raw.githubusercontent.com/ssi-dk/bifrost/dockerfiles/components/min_read_check/pipeline.smk /bifrost/
-ADD https://raw.githubusercontent.com/ssi-dk/bifrost/dockerfiles/components/min_read_check/scripts/rule__greater_than_min_reads_check.py /bifrost/scripts/
-ADD https://raw.githubusercontent.com/ssi-dk/bifrost/dockerfiles/components/min_read_check/datadump.py /bifrost/
+
 
 ENTRYPOINT \
     ["/bifrost_resources/docker_umask_002.sh"]
