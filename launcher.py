@@ -3,7 +3,7 @@
 Launcher file for accessing dockerfile commands
 """
 import argparse
-import pprint
+import json
 import subprocess
 from bifrostlib import datahandling
 
@@ -23,10 +23,10 @@ def parse_args():
                         action='store_true',
                         help='Provides basic information on component')
     args = parser.parse_args()
-    print(args)
+
     if args.info:
         show_info()
-    if args.id:
+    if args.sample_id is not None:
         run_sample(args)
 
 
@@ -35,9 +35,10 @@ def show_info():
     Shows information about the component
     """
     message = (
-        f"Component: {COMPONENT['name']}"
-        f"Version: {COMPONENT['version']}"
-    ) + pprint.pformat(COMPONENT['details'], indent=4)
+        f"Component: {COMPONENT['name']}\n"
+        f"Version: {COMPONENT['version']}\n"
+        f"Details: {json.dumps(COMPONENT['details'], indent=4)}\n"
+    )
     print(message)
 
 
