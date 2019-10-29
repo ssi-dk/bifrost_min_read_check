@@ -15,6 +15,5 @@ RUN \
 
 ADD https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
 
-
 ENTRYPOINT \
     ["/bifrost_resources/docker_umask_002.sh"]
