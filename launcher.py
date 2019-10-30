@@ -20,7 +20,12 @@ def parse_args():
         f"{COMPONENT['details']['description']}"
         f"------------------------------------------------\n\n"
         f"*Run command************************************\n"
-        f"docker run -v <input_path>:/input -v <output_path>:/output {COMPONENT['dockerfile']} -id <sample_id>\n"
+        f"docker run \ "
+        f" -e BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name> \ "
+        f" -v <input_path>:/input \ "
+        f" -v <output_path>:/output \ "
+        f" {COMPONENT['dockerfile']} \ "
+        f"    -id <sample_id>\n"
         f"************************************************\n"
     )
     parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -37,12 +42,8 @@ def parse_args():
         message = (
             f"ERROR: Connection to DB not establised.\n"
             f"please ensure env variable BIFROST_DB_KEY is set and set properly\n"
-            f"export BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name>\n"
         )
         print(message)
-    else:
-        connection_info = datahandling.get_connection_info()
-        message = f"Connected to DB: {[str(i) for i in connection_info]}\n"
 
     if args.info:
         show_info()
