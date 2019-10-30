@@ -17,8 +17,7 @@ def parse_args():
     """
     description = (
         f"{COMPONENT['details']['description']}\n"
-        f"docker run -v <input_path>:/input -v <output_path>:/output \ \n"
-        f"{COMPONENT['dockerfile']} -id <sample_id>"
+        f"docker run -v <input_path>:/input -v <output_path>:/output {COMPONENT['dockerfile']} -id <sample_id>"
     )
     parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-id', '--sample_id',
