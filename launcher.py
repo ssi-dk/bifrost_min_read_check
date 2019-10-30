@@ -69,8 +69,8 @@ def run_sample(args: object):
     """
     Runs sample ID through snakemake pipeline
     """
-    sample_id = datahandling.get_samples(sample_ids=args.sample_id)
-    component_id = datahandling.get_components(component_names=COMPONENT['name'], component_versions=COMPONENT['version'])
+    sample_id = datahandling.get_samples(sample_ids=[args.sample_id])
+    component_id = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
     if len(sample_id) != 1 or len(component_id) != 1:
         print(f"Error with sample_id or component_id:"
               f"sample_id: {' '.join(sample_id)}"
