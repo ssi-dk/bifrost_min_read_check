@@ -75,7 +75,7 @@ if __name__ == '__main__':
     if not datahandling.check_db_connection_exists():
         message = (
             f"ERROR: Connection to DB not establised.\n"
-            f"please ensure env variableBIFROST_DB_KEY is set and set properly\n"
+            f"please ensure env variable BIFROST_DB_KEY is set and set properly\n"
             f"export BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name>\n"
         )
         print(message)
