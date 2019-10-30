@@ -20,7 +20,7 @@ def parse_args():
         f"{COMPONENT['details']['description']}\n"
         f"------------------------------------------------\n\n"
         f"-Run command------------------------------------\n"
-        f"docker run -v <input_path>:/input -v <output_path>:/output {COMPONENT['dockerfile']} -id <sample_id>"
+        f"docker run -v <input_path>:/input -v <output_path>:/output {COMPONENT['dockerfile']} -id <sample_id>\n"
         f"------------------------------------------------\n"
     )
     parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawDescriptionHelpFormatter)
