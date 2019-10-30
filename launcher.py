@@ -20,11 +20,11 @@ def parse_args():
         f"{COMPONENT['details']['description']}"
         f"------------------------------------------------\n\n"
         f"*Run command************************************\n"
-        f"docker run \ "
-        f" -e BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name> \ "
-        f" -v <input_path>:/input \ "
-        f" -v <output_path>:/output \ "
-        f" {COMPONENT['dockerfile']} \ "
+        f"docker run \ \n"
+        f" -e BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name> \ \n"
+        f" -v <input_path>:/input \ \n"
+        f" -v <output_path>:/output \ \n"
+        f" {COMPONENT['dockerfile']} \ \n"
         f"    -id <sample_id>\n"
         f"************************************************\n"
     )
@@ -44,6 +44,8 @@ def parse_args():
             f"please ensure env variable BIFROST_DB_KEY is set and set properly\n"
         )
         print(message)
+    else:
+        print(datahandling.get_connection_info())
 
     if args.info:
         show_info()
