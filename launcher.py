@@ -55,7 +55,7 @@ def run_sample(args: object):
     """
     Runs sample ID through snakemake pipeline
     """
-    sample_id = datahandling.get_samples(sample_ids=args.id)
+    sample_id = datahandling.get_samples(sample_ids=args.sample_id)
     component_id = datahandling.get_components(component_names=COMPONENT['name'], component_versions=COMPONENT['version'])
     if len(sample_id) != 1 or len(component_id) != 1:
         print(f"Error with sample_id or component_id:"
@@ -72,4 +72,13 @@ def run_sample(args: object):
 
 
 if __name__ == '__main__':
-    parse_args()
+    if not datahandling.check_db_connection_exists():
+        message = (
+            f"ERROR: Connection to DB not establised.\n"
+            f"please ensure env variableBIFROST_DB_KEY is set and set properly\n"
+            f"export BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name>\n"
+        )
+        print(message)
+    else:
+        message = f"Connected to DB: {datahandling.get_connection_address()}\n"
+        parse_args()
