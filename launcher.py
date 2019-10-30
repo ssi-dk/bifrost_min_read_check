@@ -69,13 +69,22 @@ def run_sample(args: object):
     """
     Runs sample ID through snakemake pipeline
     """
-    sample_id = datahandling.get_samples(sample_ids=[args.sample_id])
-    component_id = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
-    if len(sample_id) != 1 or len(component_id) != 1:
-        print(f"Error with sample_id or component_id:"
-              f"sample_id: {' '.join(sample_id)}"
-              f"component_id: {' '.join(component_id)}"
-              )
+    sample = datahandling.get_samples(sample_ids=[args.sample_id])
+    component = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
+    if len(component) == 0:
+        print(f"component not found in DB, would you like to install it (Y/N)?:")
+        install = "N"
+        input(install)
+        if str(install).upper() == "Y":
+            datahandling.post_component(COMPONENT)
+            component = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
+
+    if len(sample) == 0:
+        # Invalid sample id
+        print(f"sample_id not found in DB")
+        pass
+    elif len(sample) != 1 or len(component) != 1:
+        print(f"Error with sample_id or component_id")
     else:
         process = subprocess.Popen(f"snakemake -s /bifrost/min_read_check/pipeline.smk --config sample_id={sample_id} component_id={component_id}",
                                    stdout=subprocess.PIPE,
