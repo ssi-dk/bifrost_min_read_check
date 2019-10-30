@@ -5,9 +5,10 @@ Launcher file for accessing dockerfile commands
 import argparse
 import json
 import subprocess
+import os
 from bifrostlib import datahandling
 
-COMPONENT = datahandling.load_yaml("config.yaml")
+COMPONENT = datahandling.load_yaml(os.path.join(os.path.dirname(__file__), 'config.yaml')
 
 
 def parse_args():
