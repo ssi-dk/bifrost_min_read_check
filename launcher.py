@@ -8,7 +8,7 @@ import subprocess
 import os
 from bifrostlib import datahandling
 
-COMPONENT = datahandling.load_yaml(os.path.join(os.path.dirname(__file__), 'config.yaml')
+COMPONENT = datahandling.load_yaml(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 
 
 def parse_args():
