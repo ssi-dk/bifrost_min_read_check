@@ -20,3 +20,4 @@ RUN \
     ln -s /bifrost/bifrost-min_read_check/launcher.py min_read_check
 
 ENTRYPOINT [ "/min_read_check"]
+CMD [ "/min_read_check", "--help"]
