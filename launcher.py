@@ -33,6 +33,17 @@ def parse_args():
                         help='Provides basic information on component')
     args = parser.parse_args()
 
+    if not datahandling.check_db_connection_exists():
+        message = (
+            f"ERROR: Connection to DB not establised.\n"
+            f"please ensure env variable BIFROST_DB_KEY is set and set properly\n"
+            f"export BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name>\n"
+        )
+        print(message)
+    else:
+        connection_info = datahandling.get_connection_info()
+        message = f"Connected to DB: {[str(i) for i in connection_info]}\n"
+
     if args.info:
         show_info()
     if args.sample_id is not None:
@@ -72,13 +83,4 @@ def run_sample(args: object):
 
 
 if __name__ == '__main__':
-    if not datahandling.check_db_connection_exists():
-        message = (
-            f"ERROR: Connection to DB not establised.\n"
-            f"please ensure env variable BIFROST_DB_KEY is set and set properly\n"
-            f"export BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name>\n"
-        )
-        print(message)
-    else:
-        message = f"Connected to DB: {datahandling.get_connection_address()}\n"
-        parse_args()
+    parse_args()
