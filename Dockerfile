@@ -1,10 +1,10 @@
 FROM \
-    ssidk/bifrost-base:2.1
+    ssidk/bifrost-base:2.0.5
 
 LABEL \
     name="bifrost-min_read_check" \
     description="Docker environment for min_read_check in bifrost" \
-    version="2.1" \
+    version="2.0.5" \
     DBversion="31/07/2019" \
     maintainer="kimn@ssi.dk;"
 
