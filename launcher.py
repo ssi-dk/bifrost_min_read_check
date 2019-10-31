@@ -101,7 +101,7 @@ def run_sample(args: object):
                 print(f"Error with installation of {COMPONENT['name']} v:{COMPONENT['version']} \n")
                 exit()
         else:
-            print(f"To continue please install component")
+            print(f"To continue please install the component")
             exit()
 
     if len(sample) == 0:
@@ -111,8 +111,8 @@ def run_sample(args: object):
     elif len(sample) != 1 or len(component) != 1:
         print(f"Error with sample_id or component_id")
     else:
-        print(f"snakemake -s /bifrost/min_read_check/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}")
-        process = subprocess.Popen(f"snakemake -s /bifrost/min_read_check/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}",
+        print(f"snakemake -s /bifrost/{COMPONENT['name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}")
+        process = subprocess.Popen(f"snakemake -s /bifrost/{COMPONENT['name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}",
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
                                    shell=True)
