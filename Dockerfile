@@ -14,6 +14,8 @@ RUN \
     git clone https://github.com/ssi-dk/bifrost-min_read_check.git min_read_check; 
 
 ADD https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
+RUN \
+    chmod +r /bifrost_resources/adapters.fasta
 
 ENTRYPOINT [ "/bifrost/min_read_check/launcher.py"]
 CMD [ "/bifrost/min_read_check/launcher.py", "--help"]

@@ -93,14 +93,16 @@ def run_sample(args: object):
     component = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
     if len(component) == 0:
         print(f"component not found in DB, would you like to install it (Y/N)?:")
-        install = ""
-        input(install)
+        install = input()
         if str(install).upper() == "Y":
             datahandling.post_component(COMPONENT)
             component = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
             if len(component) != 1:
                 print(f"Error with installation of {COMPONENT['name']} v:{COMPONENT['version']} \n")
                 exit()
+        else:
+            print(f"To continue please install component")
+            exit()
 
     if len(sample) == 0:
         # Invalid sample id
