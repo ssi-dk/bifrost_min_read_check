@@ -11,9 +11,9 @@ LABEL \
 RUN \
     conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; \
     cd bifrost; \
-    git clone https://github.com/ssi-dk/bifrost-min_read_check.git
+    git clone https://github.com/ssi-dk/bifrost-min_read_check.git min_read_check; 
 
 ADD https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
 
-ENTRYPOINT [ "/bifrost/bifrost-min_read_check/launcher.py"]
-CMD [ "/bifrost/bifrost-min_read_check/launcher.py", "--help"]
+ENTRYPOINT [ "/bifrost/min_read_check/launcher.py"]
+CMD [ "/bifrost/min_read_check/launcher.py", "--help"]
