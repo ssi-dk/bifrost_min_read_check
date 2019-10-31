@@ -114,7 +114,6 @@ def run_sample(args: object):
         process = subprocess.Popen(f"snakemake -s /bifrost/{COMPONENT['name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}",
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
-                                   preexec_fn=os.umask(0o2),
                                    shell=True)
         process_out, process_err = process.communicate()
         print(process_out, process_err)
