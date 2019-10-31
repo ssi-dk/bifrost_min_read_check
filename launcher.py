@@ -33,6 +33,9 @@ def parse_args():
                         action='store',
                         type=str,
                         help='Sample ID of sample in bifrost, sample has already been added to the bifrost DB')
+    parser.add_argument('--install',
+                        action='store_true',
+                        help='Install component')
     parser.add_argument('-info', '--info',
                         action='store_true',
                         help='Provides basic information on component')
@@ -47,9 +50,12 @@ def parse_args():
     else:
         print(datahandling.get_connection_info())
 
+
     if args.info:
         show_info()
-    if args.sample_id is not None:
+    elif args.install:
+        install_component()
+    elif args.sample_id is not None:
         run_sample(args)
 
 
@@ -65,6 +71,20 @@ def show_info():
     print(message)
 
 
+def install_component():
+    component = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
+    if len(component) == 1:
+        print(f"Component has already been installed")
+    elif len(component) > 1:
+        print(f"Component exists multiple times in DB, please contact an admin to fix this in order to proceed")
+    else:
+        datahandling.post_component(COMPONENT)
+        component = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
+        if len(component) != 1:
+            print(f"Error with installation of {COMPONENT['name']} v:{COMPONENT['version']} \n")
+            exit()
+
+
 def run_sample(args: object):
     """
     Runs sample ID through snakemake pipeline
@@ -73,7 +93,7 @@ def run_sample(args: object):
     component = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
     if len(component) == 0:
         print(f"component not found in DB, would you like to install it (Y/N)?:")
-        install = "N"
+        install = ""
         input(install)
         if str(install).upper() == "Y":
             datahandling.post_component(COMPONENT)
