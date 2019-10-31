@@ -10,8 +10,8 @@ from bifrostlib import datahandling
 
 COMPONENT = datahandling.load_yaml(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 
-
 def parse_args():
+    os.umask(0o002)
     """
     Arg parsing via argparse
     """
