@@ -11,7 +11,6 @@ from bifrostlib import datahandling
 COMPONENT = datahandling.load_yaml(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 
 def parse_args():
-    os.umask(0o002)
     """
     Arg parsing via argparse
     """
@@ -115,6 +114,7 @@ def run_sample(args: object):
         process = subprocess.Popen(f"snakemake -s /bifrost/{COMPONENT['name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}",
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
+                                   preexec_fn=os.umask(0o2),
                                    shell=True)
         process_out, process_err = process.communicate()
         print(process_out, process_err)
