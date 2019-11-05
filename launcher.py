@@ -107,8 +107,10 @@ def run_sample(args: object):
         # Invalid sample id
         print(f"sample_id not found in DB")
         pass
-    elif len(sample) != 1 or len(component) != 1:
-        print(f"Error with sample_id or component_id")
+    elif len(sample) != 1:
+        print(f"Error with sample_id")
+    elif len(component) != 1:
+        print(f"Error with component_id")
     else:
         print(f"snakemake -s /bifrost/{COMPONENT['name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}")
         process = subprocess.Popen(f"snakemake -s /bifrost/{COMPONENT['name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}",

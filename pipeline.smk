@@ -7,12 +7,6 @@ bifrost_sampleComponentObj = datahandling.SampleComponentObj(config["sample_id"]
 sample_name, component_name, dockerfile, options, bifrost_resources = bifrost_sampleComponentObj.load()
 bifrost_sampleComponentObj.started()
 
-singularity: dockerfile
-
-
-onsuccess:
-    bifrost_sampleComponentObj.success()
-
 
 onerror:
     bifrost_sampleComponentObj.failure()

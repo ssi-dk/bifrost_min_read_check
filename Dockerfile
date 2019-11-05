@@ -10,10 +10,11 @@ LABEL \
 
 RUN \
     conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; \
-    cd bifrost; \
-    git clone https://github.com/ssi-dk/bifrost-min_read_check.git min_read_check; 
+    cd /bifrost; \
+    git clone https://github.com/ssi-dk/bifrost-min_read_check.git min_read_check;
 
-ADD https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
+ADD \
+    https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
 RUN \
     chmod +r /bifrost_resources/adapters.fasta
 
