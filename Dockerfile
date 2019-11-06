@@ -1,22 +1,39 @@
-FROM \
-    ssidk/bifrost-base:2.0.5
+FROM ssidk/bifrost-base:2.0.5
+
+ARG version="2.0.5"
+ARG last_updated="31/07/2019"
+ARG name="min_read_check"
+ARG full_name="bifrost-${name}"
 
 LABEL \
-    name="bifrost-min_read_check" \
-    description="Docker environment for min_read_check in bifrost" \
-    version="2.0.5" \
-    DBversion="31/07/2019" \
+    name=${name} \
+    description="Docker environment for ${full_name}" \
+    version=${version} \
+    resource_version=${last_updated} \
     maintainer="kimn@ssi.dk;"
 
+#- Tools to install:start---------------------------------------------------------------------------
 RUN \
-    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; \
-    cd /bifrost; \
-    git clone https://github.com/ssi-dk/bifrost-min_read_check.git min_read_check;
+    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58;
+#- Tools to install:end ----------------------------------------------------------------------------
 
-ADD \
-    https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta /bifrost_resources/
-RUN \
-    chmod +r /bifrost_resources/adapters.fasta
+#- Source code:start -------------------------------------------------------------------------------
+    RUN cd /bifrost && \
+    git clone --branch ${version} https://github.com/ssi-dk/${full_name}.git ${name};
+#- Source code:end ---------------------------------------------------------------------------------
 
-ENTRYPOINT [ "/bifrost/min_read_check/launcher.py"]
-CMD [ "/bifrost/min_read_check/launcher.py", "--help"]
+#- Additional resources (files/DBs): start ---------------------------------------------------------
+RUN cd /bifrost_resources && \
+    wget -q https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta && \
+    chmod +r adapters.fasta
+#- Additional resources (files/DBs): end -----------------------------------------------------------
+
+#- Additional initialization: start ----------------------------------------------------------------
+# None
+#- Additional initialization: end ------------------------------------------------------------------
+
+#- Set up entry point:start ------------------------------------------------------------------------
+ENV PATH /bifrost/${name}/:$PATH
+ENTRYPOINT ["launcher.py"]
+CMD ["launcher.py", "--help"]
+#- Set up entry point:end ------
