@@ -17,20 +17,16 @@ RUN \
     conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58;
 #- Tools to install:end ----------------------------------------------------------------------------
 
-#- Source code:start -------------------------------------------------------------------------------
-    RUN cd /bifrost && \
-    git clone --branch ${version} https://github.com/ssi-dk/${full_name}.git ${name};
-#- Source code:end ---------------------------------------------------------------------------------
-
 #- Additional resources (files/DBs): start ---------------------------------------------------------
 RUN cd /bifrost_resources && \
     wget -q https://raw.githubusercontent.com/ssi-dk/bifrost/master/setup/adapters.fasta && \
     chmod +r adapters.fasta
 #- Additional resources (files/DBs): end -----------------------------------------------------------
 
-#- Additional initialization: start ----------------------------------------------------------------
-# None
-#- Additional initialization: end ------------------------------------------------------------------
+#- Source code:start -------------------------------------------------------------------------------
+RUN cd /bifrost && \
+    git clone --branch ${version} https://github.com/ssi-dk/${full_name}.git ${name};
+#- Source code:end ---------------------------------------------------------------------------------
 
 #- Set up entry point:start ------------------------------------------------------------------------
 ENV PATH /bifrost/${name}/:$PATH
