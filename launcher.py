@@ -125,9 +125,6 @@ def run_sample(args: object):
                 shell=True
             )
             process.communicate()
-            if process.poll() != 0:
-                print("Error in running component, please see logs")
-
         except:
             print(traceback.format_exc())
 
