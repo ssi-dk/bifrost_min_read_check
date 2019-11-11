@@ -121,7 +121,7 @@ def run_sample(args: object):
             stderr=subprocess.STDOUT,
             shell=True
         ).communicate()
-        print(process[0], process(1))
+        print(process)
 
 
 if __name__ == '__main__':
