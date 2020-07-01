@@ -10,7 +10,7 @@ jobs:
     
     steps:
     - name: test
-      run: ls
+      run: pwd; echo $(ls);
     - name: Build and push Docker images
       uses: docker/build-push-action@v1.1.0
       with:
