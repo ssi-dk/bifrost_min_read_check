@@ -1,5 +1,7 @@
 name: Build and push Docker images
 on:
+  push:
+    branches: master
   release:
     types: [created]
 jobs:
@@ -7,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: test
+      run: ls
     - name: Build and push Docker images
       uses: docker/build-push-action@v1.1.0
       with:
@@ -25,9 +29,9 @@ jobs:
         # Automatically tags the built image with the git short SHA as per the readme
         # tag_with_sha: # optional
         # Path to the build context
-        path: . # optional, default is 
+        # path: . # optional, default is .
         # Path to the Dockerfile (Default is '{path}/Dockerfile')
-        dockerfile: ./Dockerfile # optional
+        # dockerfile: ./Dockerfile # optional
         # Sets the target stage to build
         # target: # optional
         # Always attempt to pull a newer version of the image
