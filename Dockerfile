@@ -54,6 +54,6 @@ RUN \
 #- Source code:end ---------------------------------------------------------------------------------
 
 #- Set up entry point:start ------------------------------------------------------------------------
-ENTRYPOINT ["python3", "-m", ${NAME}]
-CMD ["python3", "-m", ${NAME}, "--help"]
+ENTRYPOINT ["python3", "-m", "bifrost_min_read_check"]
+CMD ["python3", "-m", "bifrost_min_read_check", "--help"]
 #- Set up entry point:end --------------------------------------------------------------------------
