@@ -31,6 +31,7 @@ def test_install_component(mydb):
     launcher.run_program(args)
 
 def test_pipeline(mydb, tmp_path):
+    #TODO: Test is incomplete
     test_install_component(mydb)
     d = tmp_path / "samples"
     d.mkdir()
