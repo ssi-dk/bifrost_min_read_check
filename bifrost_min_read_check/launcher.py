@@ -12,7 +12,7 @@ from bifrostlib import datahandling
 
 COMPONENT: dict = datahandling.load_yaml(os.path.join(os.path.dirname(__file__), 'config.yaml'))
 
-def parse_args():
+def parser(args):
     """
     Arg parsing via argparse
     """
@@ -25,7 +25,7 @@ def parse_args():
         f" -e BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name> \ \n"
         f" -v <input_path>:/input \ \n"
         f" -v <output_path>:/output \ \n"
-        f" {COMPONENT['dockerfile']} \ \n"
+        f" {COMPONENT['install']['dockerfile']} \ \n"
         f"    -id <sample_id>\n"
         f"************************************************\n"
     )
@@ -42,6 +42,9 @@ def parse_args():
                         help='Provides basic information on component')
     args: argparse.Namespace = parser.parse_args()
 
+    return args
+
+def run_program(args: argparse.Namespace):
     if not datahandling.check_db_connection_exists():
         message: str = (
             f"ERROR: Connection to DB not establised.\n"
@@ -50,7 +53,6 @@ def parse_args():
         print(message)
     else:
         print(datahandling.get_connection_info())
-
 
     if args.info:
         show_info()
@@ -75,16 +77,19 @@ def show_info():
 
 
 def install_component():
-    component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
-    if len(component) == 1:
-        print(f"Component has already been installed")
-    elif len(component) > 1:
+    component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']])
+    # if len(component) == 1:
+    #     print(f"Component has already been installed")
+    if len(component) > 1:
         print(f"Component exists multiple times in DB, please contact an admin to fix this in order to proceed")
     else:
+        #HACK: Installs based on your current directory currently. Should be changed to the directory your docker/singularity file is
+        #HACK: Removed install check so you can reinstall the component. Should do this in a nicer way
+        COMPONENT['install']['path'] = os.path.os.getcwd()
         datahandling.post_component(COMPONENT)
-        component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
+        component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']])
         if len(component) != 1:
-            print(f"Error with installation of {COMPONENT['name']} v:{COMPONENT['version']} \n")
+            print(f"Error with installation of {COMPONENT['name']} {len(component)}\n")
             exit()
 
 
@@ -93,19 +98,10 @@ def run_sample(args: object):
     Runs sample ID through snakemake pipeline
     """
     sample: list[dict] = datahandling.get_samples(sample_ids=[args.sample_id])
-    component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
+    component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']])
     if len(component) == 0:
         print(f"component not found in DB, would you like to install it (Y/N)?:")
-        install: string = input()
-        if install.upper() == "Y":
-            datahandling.post_component(COMPONENT)
-            component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']], component_versions=[COMPONENT['version']])
-            if len(component) != 1:
-                print(f"Error with installation of {COMPONENT['name']} v:{COMPONENT['version']} \n")
-                exit()
-        else:
-            print(f"To continue please install the component")
-            exit()
+        install_component()
 
     if len(sample) == 0:
         # Invalid sample id
@@ -128,6 +124,9 @@ def run_sample(args: object):
         except:
             print(traceback.format_exc())
 
+def run():
+    args: argparse.Namespace = parser(sys.argv[1:])
+    run_program(args)
 
 if __name__ == '__main__':
-    parse_args()
+    run()

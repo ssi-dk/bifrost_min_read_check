@@ -1,11 +1,13 @@
 #-Basic info----------------------------------------------------------------------------------------
-name: min_read_check
-version: 2.0.7
+display_name: min_read_check
+name: min_read_check__unspecified__unspecified
+version:
+  code: unspecified
+  resource: unspecified
 #---------------------------------------------------------------------------------------------------
 
 #-Details-------------------------------------------------------------------------------------------
 details:
-  category: size_check
   schema_version: 2.0
   target: sample
   type: pipeline
@@ -14,8 +16,15 @@ details:
     Checks that there's a minimum number of reads after trimming to run.
 #---------------------------------------------------------------------------------------------------
 
-#-Docker location-----------------------------------------------------------------------------------
-dockerfile: &dockerfile "docker://ssidk/bifrost-min_read_check:2.0.7"
+#-Install-------------------------------------------------------------------------------------------
+install:
+  path: # Set by install program
+  dockerfile: docker://ssidk/bifrost_min_read_check:unspecified__unspecified
+# None
+#---------------------------------------------------------------------------------------------------
+
+#-Category info-------------------------------------------------------------------------------------
+category: [size_check]
 #---------------------------------------------------------------------------------------------------
 
 #-Options-------------------------------------------------------------------------------------------

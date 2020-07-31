@@ -86,7 +86,7 @@ rule greater_than_min_reads_check:
     output:
         file = component_name + "/has_min_num_of_reads"
     script:
-        os.path.join(os.path.dirname(workflow.snakefile), "scripts/rule__greater_than_min_reads_check.py")
+        os.path.join(os.path.dirname(workflow.snakefile), "rule__greater_than_min_reads_check.py")
 #* Dynamic section: end ****************************************************************************
 
 #- Templated section: start ------------------------------------------------------------------------

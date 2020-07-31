@@ -1,19 +1,41 @@
-FROM ssidk/bifrost-base:2.0.7
+# This is intended to run in Github Actions
+# Arg can be set to dev for testing purposes
+ARG BUILD_ENV="prod"
+ARG NAME="bifrost_min_read_check"
+ARG CODE_VERSION="unspecified"
+ARG RESOURCE_VERSION="unspecified"
 
-ARG version="2.0.7"
-ARG last_updated="31/07/2019"
-ARG name="min_read_check"
-ARG full_name="bifrost-${name}"
+# For dev build include testing modules via pytest done on github and in development.
+# Watchdog is included for docker development (intended method) and should preform auto testing 
+# while working on *.py files
+FROM continuumio/miniconda3:4.7.10 as build_dev
+ONBUILD ARG NAME
+ONBUILD RUN pip install pytest \
+    pytest-cov \
+    pytest-profiling \
+    coverage \
+    pyyaml \
+    argh \
+    watchdog;
+ONBUILD COPY tests /${NAME}/tests
 
+FROM continuumio/miniconda3:4.7.10 as build_prod
+ONBUILD ARG NAME
+ONBUILD RUN echo ${BUILD_ENV}
+
+FROM build_${BUILD_ENV}
+ARG NAME
 LABEL \
-    name=${name} \
-    description="Docker environment for ${full_name}" \
-    version=${version} \
-    resource_version=${last_updated} \
+    name=${NAME} \
+    description="Docker environment for ${NAME}" \
+    code_version="${CODE_VERSION}" \
+    resource_version="${RESOURCE_VERSION}" \
+    environment="${BUILD_ENV}" \
     maintainer="kimn@ssi.dk;"
 
 #- Tools to install:start---------------------------------------------------------------------------
 RUN \
+    conda install -yq -c conda-forge -c bioconda -c default snakemake-minimal==5.7.1; \
     conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58;
 #- Tools to install:end ----------------------------------------------------------------------------
 
@@ -22,12 +44,16 @@ RUN \
 #- Additional resources (files/DBs): end -----------------------------------------------------------
 
 #- Source code:start -------------------------------------------------------------------------------
-RUN cd /bifrost && \
-    git clone --branch ${version} https://github.com/ssi-dk/${full_name}.git ${name};
+COPY ${NAME} /${NAME}/${NAME}
+COPY setup.py /${NAME}
+RUN \
+    sed -i'' 's/<code_version>/'"${CODE_VERSION}"'/g' /${NAME}/${NAME}/config.yaml; \
+    sed -i'' 's/<resource_version>/'"${RESOURCE_VERSION}"'/g' /${NAME}/${NAME}/config.yaml; \
+    cd /${NAME}; \
+    pip install -e .; 
 #- Source code:end ---------------------------------------------------------------------------------
 
 #- Set up entry point:start ------------------------------------------------------------------------
-ENV PATH /bifrost/${name}/:$PATH
-ENTRYPOINT ["launcher.py"]
-CMD ["launcher.py", "--help"]
-#- Set up entry point:end ------
+ENTRYPOINT ["python3", "-m", ${NAME}]
+CMD ["python3", "-m", ${NAME}, "--help"]
+#- Set up entry point:end --------------------------------------------------------------------------

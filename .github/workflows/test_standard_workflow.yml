@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - dev
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine
+    - name: Build docker image
+      run: |
+        docker build --build-arg BUILD_ENV=dev -t bifrost_min_read_check .
+    - name: Run_tests
+      run: >
+          docker run 
+          -w /bifrost_min_read_check
+          --entrypoint "python3"
+          -e BIFROST_DB_KEY=${{ secrets.MONGODB_ATLAS_CONNECTION }}/bifrost_min_read_check_test 
+          bifrost_min_read_check 
+          -m pytest
