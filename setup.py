@@ -21,6 +21,6 @@ setup(
     include_package_data=True,
 
     install_requires=[
-        'bifrostlib==v2.0.8'
+        'bifrostlib==2.0.8'
     ]
 )
