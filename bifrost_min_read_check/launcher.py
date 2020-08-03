@@ -112,10 +112,10 @@ def run_sample(args: object):
     elif len(component) != 1:
         print(f"Error with component_id")
     else:
-        print(f"snakemake -s /bifrost/{COMPONENT['display_name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}")
+        print(f"snakemake -s /bifrost_{COMPONENT['display_name']}/bifrost_{COMPONENT['display_name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}")
         try:
             process: subprocess.Popen = subprocess.Popen(
-                f"snakemake -s /bifrost/{COMPONENT['display_name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}",
+                f"snakemake -s /bifrost_{COMPONENT['display_name']}/bifrost_{COMPONENT['display_name']}/pipeline.smk --config sample_id={str(sample[0]['_id'])} component_id={str(component[0]['_id'])}",
                 stdout=sys.stdout,
                 stderr=sys.stderr,
                 shell=True
