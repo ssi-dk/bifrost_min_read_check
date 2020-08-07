@@ -1,5 +1,4 @@
-.mongoDB_dev_keys.env
-.mongoDB_prod_keys.env
+.secret*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

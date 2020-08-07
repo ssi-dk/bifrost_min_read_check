@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  python:
+    build:
+      context: .
+      args:
+        BUILD_ENV: dev
+    env_file:
+      - .secret_mongodb_dev_key.env
+  python-tests:
+    build:
+      context: .
+      args:
+        BUILD_ENV: dev
+    working_dir: /bifrost_min_read_check/
+    env_file:
+      - .secret_mongodb_dev_key.env
+    volumes:
+      - ./bifrost_min_read_check:/bifrost_min_read_check/bifrost_min_read_check
+      - ./tests:/bifrost_min_read_check/tests
+    entrypoint: watchmedo auto-restart --recursive --pattern="*.py" --directory="/bifrost_min_read_check" -- pytest --verbose
+    depends_on:
+      - python

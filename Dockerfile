@@ -8,20 +8,28 @@ ARG RESOURCE_VERSION="unspecified"
 # For dev build include testing modules via pytest done on github and in development.
 # Watchdog is included for docker development (intended method) and should preform auto testing 
 # while working on *.py files
-FROM continuumio/miniconda3:4.7.10 as build_dev
+#
+# Test data is in bifrost_run_launcher:dev
+FROM ssidk/bifrost_run_launcher:dev as build_dev
 ONBUILD ARG NAME
-ONBUILD RUN pip install pytest \
-    pytest-cov \
-    pytest-profiling \
-    coverage \
-    pyyaml \
-    argh \
-    watchdog;
-ONBUILD COPY tests /${NAME}/tests
+ONBUILD COPY . /${NAME}
+ONBUILD WORKDIR /${NAME}
+ONBUILD RUN \
+    sed -i'' 's/<code_version>/'"${CODE_VERSION}"'/g' ${NAME}/config.yaml; \
+    sed -i'' 's/<resource_version>/'"${RESOURCE_VERSION}"'/g' ${NAME}/config.yaml; \
+    pip install -r requirements.dev.txt;
 
 FROM continuumio/miniconda3:4.7.10 as build_prod
 ONBUILD ARG NAME
-ONBUILD RUN echo ${BUILD_ENV}
+ONBUILD WORKDIR ${NAME}
+ONBUILD COPY ${NAME} ${NAME}
+ONBUILD COPY setup.py setup.py
+ONBUILD COPY requirements.txt requirements.txt
+ONBUILD RUN \
+    sed -i'' 's/<code_version>/'"${CODE_VERSION}"'/g' ${NAME}/config.yaml; \
+    sed -i'' 's/<resource_version>/'"${RESOURCE_VERSION}"'/g' ${NAME}/config.yaml; \
+    ls; \
+    pip install -r requirements.txt
 
 FROM build_${BUILD_ENV}
 ARG NAME
@@ -36,7 +44,8 @@ LABEL \
 #- Tools to install:start---------------------------------------------------------------------------
 RUN \
     conda install -yq -c conda-forge -c bioconda -c default snakemake-minimal==5.7.1; \
-    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58;
+    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; \
+    pip list;
 #- Tools to install:end ----------------------------------------------------------------------------
 
 #- Additional resources (files/DBs): start ---------------------------------------------------------
@@ -44,13 +53,7 @@ RUN \
 #- Additional resources (files/DBs): end -----------------------------------------------------------
 
 #- Source code:start -------------------------------------------------------------------------------
-COPY ${NAME} /${NAME}/${NAME}
-COPY setup.py /${NAME}
-RUN \
-    sed -i'' 's/<code_version>/'"${CODE_VERSION}"'/g' /${NAME}/${NAME}/config.yaml; \
-    sed -i'' 's/<resource_version>/'"${RESOURCE_VERSION}"'/g' /${NAME}/${NAME}/config.yaml; \
-    cd /${NAME}; \
-    pip install -e .; 
+#
 #- Source code:end ---------------------------------------------------------------------------------
 
 #- Set up entry point:start ------------------------------------------------------------------------
