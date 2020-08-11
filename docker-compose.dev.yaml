@@ -18,6 +18,8 @@ services:
     volumes:
       - ./bifrost_min_read_check:/bifrost_min_read_check/bifrost_min_read_check
       - ./tests:/bifrost_min_read_check/tests
+      - ../../lib/bifrostlib:/bifrostlib
+      # - ../bifrost_run_launcher/bifrost_run_launcher:/bifrost_run_launcher/bifrost_run_launcher
     entrypoint: watchmedo auto-restart --recursive --pattern="*.py" --directory="/bifrost_min_read_check" -- pytest --verbose
     depends_on:
       - python

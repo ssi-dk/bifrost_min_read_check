@@ -34,7 +34,7 @@ options:
 
 #-Required resource files---------------------------------------------------------------------------
 resources:
-  adapters_fasta: "resources/adapters.fasta"
+  adapters_fasta: "/bifrost_min_read_check/resources/adapters.fasta"
 #---------------------------------------------------------------------------------------------------
 
 #-Requirements to run component---------------------------------------------------------------------

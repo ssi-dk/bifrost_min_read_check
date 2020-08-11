@@ -1,4 +1,5 @@
 import os
+import shutil
 import pymongo
 import pytest
 import argparse
@@ -40,6 +41,7 @@ def test_install_component(mydb):
 
     args: argparse.Namespace = bmrcl.parser(["--install"])
     bmrcl.run_program(args)
+    
 
 def test_setup_of_data(mydb):
     test_install_component(mydb)
@@ -51,6 +53,9 @@ def test_setup_of_data(mydb):
                 shell=True,
                 cwd="/bifrost_test_data/read_data/")
         process_out, process_err = process.communicate()
+    if os.path.isdir("/bifrost_test_data/output/setup"):
+        shutil.rmtree("/bifrost_test_data/output/setup")
+    os.makedirs("/bifrost_test_data/output/setup")
     args = brl.parser([
         "-pre", "/bifrost_test_data/pre.sh",
         "-per", "/bifrost_test_data/per_sample.sh",
@@ -58,7 +63,8 @@ def test_setup_of_data(mydb):
         "-meta", "/bifrost_test_data/run_metadata.tsv",
         "-reads", "/bifrost_test_data/read_data",
         "-name", "test_run",
-        "-type", "test"
+        "-type", "test",
+        "-out", "/bifrost_test_data/output/setup"
     ])
     brl.run_program(args)
     assert os.path.isfile("run.yaml")
@@ -66,8 +72,8 @@ def test_setup_of_data(mydb):
         run_doc = yaml.safe_load(file_handle)
     print(run_doc["samples"])
     assert(run_doc["samples"][0]["name"] == "S1")
-    assert os.path.isfile("samples.yaml")
-    assert os.path.isfile("run_script.sh")
+    assert os.path.isfile("/bifrost_test_data/output/setup/samples.yaml")
+    assert os.path.isfile("/bifrost_test_data/output/setup/run_script.sh")
 
 def test_pipeline(mydb):
     test_setup_of_data(mydb)
@@ -75,6 +81,9 @@ def test_pipeline(mydb):
         run_doc = yaml.safe_load(file_handle)
     sample_id = run_doc["samples"][0]['_id'].strip("ObjectId('").strip("')")
     print(sample_id, str(sample_id))
-    args = bmrcl.parser(["-id", sample_id])
+    if os.path.isdir("/bifrost_test_data/output/test1"):
+        shutil.rmtree("/bifrost_test_data/output/test1")
+    os.makedirs("/bifrost_test_data/output/test1")
+    args = bmrcl.parser(["-id", sample_id,"-out", "/bifrost_test_data/output/test1"])
     bmrcl.run_program(args)
-    
+    assert os.path.isfile("/bifrost_test_data/output/test1/min_read_check/datadump_complete")
