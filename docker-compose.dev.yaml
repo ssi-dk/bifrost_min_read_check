@@ -6,15 +6,15 @@ services:
       args:
         BUILD_ENV: dev
     env_file:
-      - .secret_mongodb_dev_key.env
+      - /.secrets/mongodb_dev_key.env
   python-tests:
     build:
       context: .
       args:
         BUILD_ENV: dev
-    working_dir: /bifrost_min_read_check/
     env_file:
-      - .secret_mongodb_dev_key.env
+      - /.secrets/mongodb_dev_key.env
+    working_dir: /bifrost_min_read_check/
     volumes:
       - ./bifrost_min_read_check:/bifrost_min_read_check/bifrost_min_read_check
       - ./tests:/bifrost_min_read_check/tests
