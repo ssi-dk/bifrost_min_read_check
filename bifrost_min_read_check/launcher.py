@@ -23,26 +23,31 @@ def parser(args):
         f"*Run command************************************\n"
         f"docker run \ \n"
         f" -e BIFROST_DB_KEY=mongodb://<user>:<password>@<server>:<port>/<db_name> \ \n"
-        f" -v <input_path>:/input \ \n"
-        f" -v <output_path>:/output \ \n"
         f" {COMPONENT['install']['dockerfile']} \ \n"
-        f"    -id <sample_id>\n"
         f"************************************************\n"
     )
     parser: argparse.ArgumentParser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--install',
+                        action='store_true',
+                        help='Install/Force reinstall component')
+    parser.add_argument('-info', '--info',
+                        action='store_true',
+                        help='Provides basic information on component')
+    parser.add_argument('-out', '--outdir',
+                        default=".",
+                        help='Output directory')
     parser.add_argument('-id', '--sample_id',
                         action='store',
                         type=str,
                         help='Sample ID of sample in bifrost, sample has already been added to the bifrost DB')
-    parser.add_argument('--install',
-                        action='store_true',
-                        help='Install component')
-    parser.add_argument('-info', '--info',
-                        action='store_true',
-                        help='Provides basic information on component')
-    args: argparse.Namespace = parser.parse_args()
 
-    return args
+    try:
+        options: argparse.Namespace = parser.parse_args(args)
+    except:
+        parser.print_help()
+        sys.exit(0)
+
+    return options
 
 def run_program(args: argparse.Namespace):
     if not datahandling.check_db_connection_exists():
@@ -97,6 +102,10 @@ def run_sample(args: object):
     """
     Runs sample ID through snakemake pipeline
     """
+    if not os.path.isdir(args.outdir):
+        os.makedirs(args.outdir)
+    os.chdir(args.outdir)
+
     sample: list[dict] = datahandling.get_samples(sample_ids=[args.sample_id])
     component: list[dict] = datahandling.get_components(component_names=[COMPONENT['name']])
     if len(component) == 0:

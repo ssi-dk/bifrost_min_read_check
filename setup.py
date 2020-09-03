@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
 
-
-
 setup(
     name='bifrost_min_read_check',
     version='temp',
@@ -21,6 +19,6 @@ setup(
     include_package_data=True,
 
     install_requires=[
-        'bifrostlib==2.0.8'
+        'bifrostlib==2.0.11'
     ]
 )
