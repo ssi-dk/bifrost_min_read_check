@@ -1,22 +1,43 @@
-from bifrostlib import datahandling
+from bifrostlib import common
+from bifrostlib.datahandling import Sample
+from bifrostlib.datahandling import Component
+from bifrostlib.datahandling import SampleComponent
+import re
+from typing import Dict
 
 
-def extract_has_min_num_of_reads(sampleComponentObj):
-    import re
-    summary, results, file_path, key = sampleComponentObj.start_data_extraction("has_min_num_of_reads")
-    buffer = datahandling.read_buffer(file_path)
-    results[key]["has_min_num_of_reads"] = "has_min_num_of_reads:True" in buffer
-    results[key]["min_read_num"] = int(re.search("min_read_num:\s*([0-9]+)", buffer, re.MULTILINE).group(1))
-    summary["has_min_num_of_reads"] = results[key]["has_min_num_of_reads"]
-    return (summary, results)
+def extract_has_min_num_of_reads(summary: Dict, results: Dict) -> None:
+    file_name = "has_min_num_of_reads"
+    results[file_name]["has_min_num_of_reads"] = "True" in common.get_group_from_file("has_min_num_of_reads:(True|False)", file_name)
+    results[file_name]["num_of_reads"] = int(common.get_group_from_file("min_read_num:\s*([0-9]+)", file_name))
+    summary["has_min_num_of_reads"] = results[file_name]["has_min_num_of_reads"]
 
 
-def datadump(sampleComponentObj, log):
-    sampleComponentObj.start_data_dump(log=log)
-    sampleComponentObj.run_data_dump_on_function(extract_has_min_num_of_reads, log=log)
-    sampleComponentObj.end_data_dump(log=log)
-
+def datadump(sample: Sample, component: Component, samplecomponent: SampleComponent):
+    category: Dict = samplecomponent["categories"].get("size_check", {})
+    if category == {}:
+        samplecomponent["categories"]["size_check"] = {
+            "2.1": {
+                "component": {"id": component["_id"], "name": component["name"]},
+                "summary": {},
+                "report": {}
+            }
+        }
+    elif category != {} and category.get("2.1", {}) == {}:
+        samplecomponent["categories"]["size_check"]["2.1"] = {
+            "component": {"id": component["_id"], "name": component["name"]},
+            "summary": {},
+            "report": {}
+        }
+    summary: Dict = samplecomponent["categories"]["size_check"]["2.1"]["summary"]
+    report: Dict = samplecomponent["categories"]["size_check"]["2.1"]["report"]
+    results: Dict = samplecomponent["results"]
+    extract_has_min_num_of_reads(summary, results)
+    samplecomponent["status"] = "Success"
+    samplecomponent.save()
 
 datadump(
-    snakemake.params.sampleComponentObj,
+    snakemake.params.sample,
+    snakemake.params.component,
+    snakemake.params.samplecomponent,
     snakemake.log)
