@@ -10,6 +10,8 @@ bifrost_sampleComponentObj.started()
 
 
 onerror:
+    # Temp fix
+    bifrost_sampleComponentObj.check_requirements()
     bifrost_sampleComponentObj.failure()
 
 
