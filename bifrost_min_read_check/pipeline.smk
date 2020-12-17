@@ -15,8 +15,12 @@ try:
     #TODO: fix this, it looks like sample isnt being made properly
     sample_ref = SampleReference(_id=config.get('sample_id', None), name=config.get('sample_name', None))
     sample:Sample = Sample.load(sample_ref) # schema 2.1
-    component_ref = ComponentReference(_id=config['component_id'])
+    if sample is None:
+        raise Exception("invalid sample passed")
+    component_ref = ComponentReference(name=config['component_name'])
     component:Component = Component.load(reference=component_ref) # schema 2.1
+    if component is None:
+        raise Exception("invalid component passed")
     samplecomponent_ref = SampleComponentReference(name=SampleComponentReference.name_generator(sample.to_reference(), component.to_reference()))
     samplecomponent = SampleComponent.load(samplecomponent_ref)
     if samplecomponent is None:
@@ -25,7 +29,7 @@ try:
     samplecomponent.save()
 except Exception as error:
     print(traceback.format_exc(), file=sys.stderr)
-    raise Exception("failed to set sample, comonent and/or samplecomponent")
+    raise Exception("failed to set sample, component and/or samplecomponent")
 
 onerror:
     if samplecomponent['status'] == "Running":

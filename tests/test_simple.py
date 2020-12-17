@@ -21,8 +21,23 @@ def test_connection():
     assert "TEST" in os.environ['BIFROST_DB_KEY'].upper()  # A very basic piece of protection ensuring the word test is in the DB
 
 class TestBifrostMinReadCheck:
-    test_dir = "/bifrost/test_data/output/bifrost_min_read_check"
-    json_entries = [{"_id": {"$oid": "000000000000000000000001"}, "name": "test_sample1", "components": [], "categories": {}}]
+    current_dir = os.getcwd()
+    test_dir = "/bifrost/test_data/output/test__min_read_check/"
+    json_entries = [
+        {
+            "_id": {"$oid": "000000000000000000000001"}, 
+            "name": "S1", 
+            "components": [], 
+            "categories": {
+                "paired_reads": {
+                    "summary": {
+                        "data": ["/bifrost/test_data/samples/S1_R1.fastq.gz",
+                                 "/bifrost/test_data/samples/S1_R2.fastq.gz"]
+                    }
+                }
+            }
+        }
+    ]
     bson_entries = [database_interface.json_to_bson(i) for i in json_entries]
 
     @classmethod
@@ -33,12 +48,13 @@ class TestBifrostMinReadCheck:
         col = db["samples"]
         col.insert_many(cls.bson_entries)
         launcher.initialize()
+        os.chdir(cls.current_dir)
 
     @classmethod
     def teardown_class(cls):
         client = pymongo.MongoClient(os.environ['BIFROST_DB_KEY'])
         db = client.get_database()
-        # cls.clear_all_collections(db)
+        cls.clear_all_collections(db)
 
     @staticmethod
     def clear_all_collections(db):
@@ -60,14 +76,13 @@ class TestBifrostMinReadCheck:
             shutil.rmtree(self.test_dir)
 
         os.mkdir(self.test_dir)
-        test_args = Namespace(
-            sample_id=None,
-            sample_name=f"test_sample1",
-            outdir=self.test_dir
-            )
-        launcher.run_pipeline(test_args)
-        assert os.path.isfile(f"{self.test_dir}/test_dir/datadump_complete")
+        test_args = [
+            "--sample_name", "S1",
+            "--outdir", self.test_dir
+        ]
+        launcher.main(args=test_args)
+        assert os.path.isfile(f"{self.test_dir}/min_read_check__v2_2_0__NA/datadump_complete")
         shutil.rmtree(self.test_dir)
-        assert not os.path.isdir(f"{self.test_dir}/test_dir")
+        assert not os.path.isdir(f"{self.test_dir}/min_read_check__v2_2_0__NA")
 
 

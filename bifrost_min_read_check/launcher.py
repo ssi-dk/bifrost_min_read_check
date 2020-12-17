@@ -33,11 +33,12 @@ def initialize():
     try:
         component_ref = ComponentReference(name=config["name"])
         COMPONENT = Component.load(component_ref)
-        if '_id' in COMPONENT.json:
-            return
-        COMPONENT = Component(value=config)
-        print(Component.json)
-        install_component()
+        if COMPONENT is not None and '_id' in COMPONENT.json:
+                return
+        else:
+            COMPONENT = Component(value=config)
+            install_component()
+
     except Exception as e:
         print(traceback.format_exc(), file=sys.stderr)
     return
@@ -148,7 +149,8 @@ def run_pipeline(args: argparse.Namespace) -> None:
             sample_var = f"sample_id={args.sample_id}"
         else:
             sample_var = f"sample_name={args.sample_name}"
-        command = f"snakemake --nolock --cores all -s {os.path.join(os.path.dirname(__file__),'pipeline.smk')} --config {sample_var} component_id={COMPONENT['_id']['$oid']}"
+        print(COMPONENT.json, file=sys.stderr)
+        command = f"cd {args.outdir}; snakemake --nolock --cores all -s {os.path.join(os.path.dirname(__file__),'pipeline.smk')} --config {sample_var} component_name={COMPONENT['name']}"
         print(command)
         process: subprocess.Popen = subprocess.Popen(
             command,
@@ -161,9 +163,9 @@ def run_pipeline(args: argparse.Namespace) -> None:
         print(traceback.format_exc())
 
 
-def main():
+def main(args = sys.argv):
     initialize()
-    parse_and_run(sys.argv[1:])
+    parse_and_run(args)
 
 
 if __name__ == '__main__':
