@@ -1,15 +1,15 @@
 #-Basic info----------------------------------------------------------------------------------------
 display_name: min_read_check
-name: min_read_check__2.1.0__NA
+name: min_read_check__v2_2_0__NA
 version:
-  schema: 2.0
-  code: 2.1.0
+  schema: ["v2_1_0"]
+  code: v2_2_0
   resource: NA
 #---------------------------------------------------------------------------------------------------
 
 #-Details-------------------------------------------------------------------------------------------
 details:
-  target: sample
+  target: [sample]
   description: >
     Checks that there's a minimum number of reads after trimming to run.
 #---------------------------------------------------------------------------------------------------
@@ -32,23 +32,23 @@ options:
 
 #-Required resource files---------------------------------------------------------------------------
 resources:
-  adapters_fasta: "/bifrost_min_read_check/resources/adapters.fasta"
+  adapters_fasta: "/bifrost/components/bifrost_min_read_check/resources/adapters.fasta"
 #---------------------------------------------------------------------------------------------------
 
 #-Requirements to run component---------------------------------------------------------------------
 requirements:
   sample:
-    properties:
+    categories:
       paired_reads:
-        summary:
-          data:
+          summary:
+            data:
 #---------------------------------------------------------------------------------------------------
 
 #-DB Value changes (excluding component output)-----------------------------------------------------
 db_values_changes:
   files: []
   sample:
-    properties:
+    categories:
       size_check:
         summary:  # see sample_component summary
         component:

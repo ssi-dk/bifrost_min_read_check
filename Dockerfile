@@ -1,63 +1,70 @@
-# This is intended to run in Github Actions
-# Arg can be set to dev for testing purposes
+# This is intended to run in Local Development (dev) and Github Actions (test/prod)
+# BUILD_ENV options (dev, test, prod) dev for local testing and test for github actions testing on prod ready code
 ARG BUILD_ENV="prod"
 ARG MAINTAINER="kimn@ssi.dk;"
-ARG NAME="bifrost_min_read_check"
+ARG BIFROST_COMPONENT_NAME="bifrost_run_launcher"
 
-# For dev build include testing modules via pytest done on github and in development.
-# Watchdog is included for docker development (intended method) and should preform auto testing 
-# while working on *.py files
-#
-# Test data is in bifrost_run_launcher:dev
-#- Source code (development):start------------------------------------------------------------------
-FROM ssidk/bifrost_run_launcher:dev as build_dev
-ONBUILD ARG NAME
-ONBUILD COPY . /${NAME}
-ONBUILD WORKDIR /${NAME}
+#---------------------------------------------------------------------------------------------------
+# Base for dev environement
+#---------------------------------------------------------------------------------------------------
+FROM continuumio/miniconda3:4.8.2 as build_dev
+ONBUILD ARG BIFROST_COMPONENT_NAME
+ONBUILD COPY /components/${BIFROST_COMPONENT_NAME} /bifrost/components/${BIFROST_COMPONENT_NAME}
+ONBUILD COPY /lib/bifrostlib /bifrost/lib/bifrostlib
+ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}/
 ONBUILD RUN \
-    pip install yq; \
-    yq -Y -i '.version.code |= "dev"' ${NAME}/config.yaml; \
-    pip install -r requirements.dev.txt;
-#- Source code (development):end--------------------------------------------------------------------
+    pip install -r requirements.txt; \
+    pip install --no-cache -e file:///bifrost/lib/bifrostlib; \
+    pip install --no-cache -e file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
 
-#- Source code (productopm):start-------------------------------------------------------------------
-FROM continuumio/miniconda3:4.7.10 as build_prod
-ONBUILD ARG NAME
-ONBUILD WORKDIR ${NAME}
-ONBUILD COPY ${NAME} ${NAME}
-ONBUILD COPY resources resources
-ONBUILD COPY setup.py setup.py
-ONBUILD COPY requirements.txt requirements.txt
+#---------------------------------------------------------------------------------------------------
+# Base for production environment
+#---------------------------------------------------------------------------------------------------
+FROM continuumio/miniconda3:4.8.2 as build_prod
+ONBUILD ARG BIFROST_COMPONENT_NAME
+ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
+ONBUILD COPY ./ ./
 ONBUILD RUN \
-    pip install -r requirements.txt
-#- Source code (productopm):end---------------------------------------------------------------------
+    pip install file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
 
-#- Use development or production to and add info: start---------------------------------------------
+#---------------------------------------------------------------------------------------------------
+# Base for test environment (prod with tests)
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+FROM continuumio/miniconda3:4.8.2 as build_test
+ONBUILD ARG BIFROST_COMPONENT_NAME
+ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
+ONBUILD COPY ./ ./
+ONBUILD RUN \
+    pip install -r requirements.txt \
+    pip install file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
+
+#---------------------------------------------------------------------------------------------------
+# Details
+#---------------------------------------------------------------------------------------------------
 FROM build_${BUILD_ENV}
-ARG NAME
+ARG BIFROST_COMPONENT_NAME
 LABEL \
-    name=${NAME} \
-    description="Docker environment for ${NAME}" \
+    BIFROST_COMPONENT_NAME=${BIFROST_COMPONENT_NAME} \
+    description="Docker environment for ${BIFROST_COMPONENT_NAME}" \
     environment="${BUILD_ENV}" \
     maintainer="${MAINTAINER}"
-#- Use development or production to and add info: end---------------------------------------------
 
-#- Tools to install:start---------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+# Additional programs for all environments
+#---------------------------------------------------------------------------------------------------
 RUN \
     conda install -yq -c conda-forge -c bioconda -c default snakemake-minimal==5.7.1; \
-    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; \
-    pip list;
-#- Tools to install:end ----------------------------------------------------------------------------
+    conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; 
 
-#- Additional resources (files/DBs): start ---------------------------------------------------------
-#
-#- Additional resources (files/DBs): end -----------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+# Additional resources
+#---------------------------------------------------------------------------------------------------
+# N/A
 
-#- Source code:start -------------------------------------------------------------------------------
-#
-#- Source code:end ---------------------------------------------------------------------------------
-
-#- Set up entry point:start ------------------------------------------------------------------------
-ENTRYPOINT ["python3", "-m", "bifrost_min_read_check"]
-CMD ["python3", "-m", "bifrost_min_read_check", "--help"]
-#- Set up entry point:end --------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+# Run and entry commands
+#---------------------------------------------------------------------------------------------------
+WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
+ENTRYPOINT ["python3", "-m", "bifrost_run_launcher"]
+CMD ["python3", "-m", "bifrost_run_launcher", "--help"]
