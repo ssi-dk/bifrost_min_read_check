@@ -130,7 +130,7 @@ def parse_and_run(args: List[str]) -> None:
             show_info()
             return None
         else:
-            pipeline_options:argparse.Namespace = parser.parse_args(extras)
+            pipeline_options, junk = parser.parse_known_args(extras)
             if pipeline_options.debug is True:
                 print(pipeline_options)
             run_pipeline(pipeline_options)
@@ -149,7 +149,6 @@ def run_pipeline(args: argparse.Namespace) -> None:
             sample_var = f"sample_id={args.sample_id}"
         else:
             sample_var = f"sample_name={args.sample_name}"
-        print(COMPONENT.json, file=sys.stderr)
         command = f"cd {args.outdir}; snakemake --nolock --cores all -s {os.path.join(os.path.dirname(__file__),'pipeline.smk')} --config {sample_var} component_name={COMPONENT['name']}"
         print(command)
         process: subprocess.Popen = subprocess.Popen(

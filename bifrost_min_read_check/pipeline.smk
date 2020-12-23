@@ -32,6 +32,8 @@ except Exception as error:
     raise Exception("failed to set sample, component and/or samplecomponent")
 
 onerror:
+    if not samplecomponent.has_requirements():
+        samplecomponent['status'] = "Requirements not met"
     if samplecomponent['status'] == "Running":
         samplecomponent['status'] = "Failure"
         samplecomponent.save()
