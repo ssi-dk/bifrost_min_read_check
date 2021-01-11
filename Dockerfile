@@ -9,8 +9,9 @@ ARG FORCE_DOWNLOAD=true
 # Programs for all environments
 #---------------------------------------------------------------------------------------------------
 FROM continuumio/miniconda3:4.8.2 as build_base
-ARG BIFROST_COMPONENT_NAME
-ARG BUILD_ENV
+ONBUILD ARG BIFROST_COMPONENT_NAME
+ONBUILD ARG BUILD_ENV
+ONBUILD ARG MAINTAINER
 LABEL \
     BIFROST_COMPONENT_NAME=${BIFROST_COMPONENT_NAME} \
     description="Docker environment for ${BIFROST_COMPONENT_NAME}" \
@@ -24,7 +25,7 @@ RUN \
 # Base for dev environement
 #---------------------------------------------------------------------------------------------------
 FROM continuumio/miniconda3:4.8.2 as build_dev
-ARG BIFROST_COMPONENT_NAME
+ONBUILD ARG BIFROST_COMPONENT_NAME
 COPY --from=build_base / /
 COPY /components/${BIFROST_COMPONENT_NAME} /bifrost/components/${BIFROST_COMPONENT_NAME}
 COPY /lib/bifrostlib /bifrost/lib/bifrostlib
@@ -38,7 +39,7 @@ RUN \
 # Base for production environment
 #---------------------------------------------------------------------------------------------------
 FROM continuumio/miniconda3:4.8.2 as build_prod
-ARG BIFROST_COMPONENT_NAME
+ONBUILD ARG BIFROST_COMPONENT_NAME
 COPY --from=build_base / /
 WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
 COPY ./ ./
@@ -50,7 +51,7 @@ RUN \
 #---------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 FROM continuumio/miniconda3:4.8.2 as build_test
-ARG BIFROST_COMPONENT_NAME
+ONBUILD ARG BIFROST_COMPONENT_NAME
 COPY --from=build_base / /
 WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
 COPY ./ ./
@@ -63,6 +64,7 @@ RUN \
 # Additional resources
 #---------------------------------------------------------------------------------------------------
 FROM build_${BUILD_ENV}
+ONBUILD ARG BIFROST_COMPONENT_NAME
 # NA
 
 #---------------------------------------------------------------------------------------------------
