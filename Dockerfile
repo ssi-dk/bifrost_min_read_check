@@ -10,7 +10,7 @@ ARG FORCE_DOWNLOAD=true
 #---------------------------------------------------------------------------------------------------
 FROM continuumio/miniconda3:4.8.2 as build_base
 ARG BIFROST_COMPONENT_NAME
-ARG FORCE_DOWNLOAD
+ARG BUILD_ENV
 LABEL \
     BIFROST_COMPONENT_NAME=${BIFROST_COMPONENT_NAME} \
     description="Docker environment for ${BIFROST_COMPONENT_NAME}" \

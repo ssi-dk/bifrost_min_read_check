@@ -33,10 +33,9 @@ def datadump(samplecomponent_ref_json: Dict):
         )
     extract_has_min_num_of_reads(size_check, samplecomponent["results"], samplecomponent["component"]["name"])
     samplecomponent.set_category(size_check)
-    samplecomponent["status"] = "Success"
-    samplecomponent.save()
     sample.set_category(size_check)
-    sample.save()
+    common.set_status_and_save(sample, samplecomponent, "Success")
+    
     with open(os.path.join(samplecomponent["component"]["name"], "datadump_complete"), "w+") as fh:
         fh.write("done")
 
