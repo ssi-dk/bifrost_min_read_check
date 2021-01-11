@@ -2,7 +2,7 @@
 # BUILD_ENV options (dev, test, prod) dev for local testing and test for github actions testing on prod ready code
 ARG BUILD_ENV="prod"
 ARG MAINTAINER="kimn@ssi.dk;"
-ARG BIFROST_COMPONENT_NAME="bifrost_run_launcher"
+ARG BIFROST_COMPONENT_NAME="bifrost_min_read_check"
 ARG FORCE_DOWNLOAD=true
 
 #---------------------------------------------------------------------------------------------------
@@ -71,5 +71,5 @@ ONBUILD ARG BIFROST_COMPONENT_NAME
 # Run and entry commands
 #---------------------------------------------------------------------------------------------------
 WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
-ENTRYPOINT ["python3", "-m", "bifrost_run_launcher"]
-CMD ["python3", "-m", "bifrost_run_launcher", "--help"]
+ENTRYPOINT ["python3", "-m", "bifrost_min_read_check"]
+CMD ["python3", "-m", "bifrost_min_read_check", "--help"]
