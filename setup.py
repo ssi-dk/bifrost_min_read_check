@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='bifrost_min_read_check',
-    version='v2_2_2',
+    version='v2_2_3',
     description='Datahandling functions for bifrost (later to be API interface)',
     url='https://github.com/ssi-dk/bifrost_min_read_check',
     author="Kim Ng, Martin Basterrechea",
