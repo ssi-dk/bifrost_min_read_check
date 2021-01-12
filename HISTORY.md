@@ -3,7 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
+## [v2_2_2] - 2020-12-17
+### Notes
+Fixed bump2version to also update test_simple.py
+### Changed
+- setup.cfg
+- /tests/test_simple.py
 ## [v2_2_2] - 2020-12-17
 ### Notes
 Forgot to update history before bumping, but made sure it worked on github for CI/CD
