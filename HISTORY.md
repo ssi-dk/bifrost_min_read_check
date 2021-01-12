@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2_2_2] - 2020-12-17
+### Notes
+Forgot to update history before bumping, but made sure it worked on github for CI/CD
+### Changed
+- Dockerfile
+- .github/workflows/run_tests.yml
+- setup.cfg
+  - Better utilizing bump2vesion options
 ## [v2_2_1] - 2020-12-17
 ### Notes
 Development has adjusted from dev/prod on github to test/prod. Test for testing and prod for live code. Dev is now local and utilizes the whole bifrost folder structure while test/prod only utilizes the submodule structure. Currently tests have not been updated to reflect this change.
