@@ -1,34 +1,23 @@
 # script for use with snakemake
-import sys
 import traceback
-import os
-from bifrostlib import datahandling
+from typing import Dict
+from bifrostlib import common
 
-def rule__greater_than_min_reads_check(input, output, sampleComponentObj, log):
-    import re
+def rule__greater_than_min_reads_check(input: object, output: object, component_json: Dict, log: object) -> None:
     try:
-        this_function_name = sys._getframe().f_code.co_name
-        name, options, resources = sampleComponentObj.start_rule(this_function_name, log=log)
-
-        # Variables being used
-        min_read_number = options["min_num_reads"]
-        stats_data = datahandling.read_buffer(input.stats_file)
-        output_file = str(output.file)
-
-        # Code to run
-        num_of_reads = int(re.search("Result:\s*([0-9]+)\sreads", stats_data, re.MULTILINE).group(1))
-        has_min_num_of_reads = False
+        num_of_reads: int = int(common.get_group_from_file("Result:\s*([0-9]+)\sreads", input.stats_file))
+        min_read_number: int = component_json["options"]["min_num_reads"]
+        has_min_num_of_reads: bool = False
         if num_of_reads > min_read_number:
             has_min_num_of_reads = True
-        with open(output_file, "w") as output:
-            output.write("has_min_num_of_reads:{}\nmin_read_num:{}".format(has_min_num_of_reads, num_of_reads))
-        sampleComponentObj.end_rule(this_function_name, log=log)
+        with open(output._file, "w") as fh:
+            fh.write(f"has_min_num_of_reads:{has_min_num_of_reads}\nnum_of_reads:{num_of_reads}\n")
     except Exception:
-        sampleComponentObj.write_log_err(log, str(traceback.format_exc()))
-
+        with open(log.err_file, "w+") as fh:
+            fh.write(traceback.format_exc())
 
 rule__greater_than_min_reads_check(
     snakemake.input,
     snakemake.output,
-    snakemake.params.sampleComponentObj,
+    snakemake.params.component_json,
     snakemake.log)
