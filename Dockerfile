@@ -57,7 +57,7 @@ ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
 ONBUILD COPY ./ ./
 ONBUILD RUN \
     pip install -r requirements.txt \
-    pip install file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
+    pip install -e file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
 
 
 #---------------------------------------------------------------------------------------------------
