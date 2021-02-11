@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [v2_2_5] - 2021-02-11
+### Notes
+Update dependencies bifrostlib to 2.1.5
+### Changed
+- setup.py
 ## [v2_2_2] - 2020-12-17
 ### Notes
 Fixed bump2version to also update test_simple.py
