@@ -44,7 +44,7 @@ ONBUILD COPY --from=build_base / /
 ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
 ONBUILD COPY ./ ./
 ONBUILD RUN \
-    pip install file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
+    pip install -e file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
 
 #---------------------------------------------------------------------------------------------------
 # Base for test environment (prod with tests)
