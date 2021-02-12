@@ -13,7 +13,7 @@ def extract_has_min_num_of_reads(size_check: Category, results: Dict, component_
     file_path = os.path.join(component_name, file_name)
     results[file_key] = {}
     results[file_key]["has_min_num_of_reads"] = "True" in common.get_group_from_file("has_min_num_of_reads:(True|False)", file_path)
-    results[file_key]["num_of_reads"] = common.get_group_from_file("min_read_num:\s*([0-9]+)", file_path)
+    results[file_key]["num_of_reads"] = common.get_group_from_file("num_of_reads:\s*([0-9]+)", file_path)
     size_check["summary"]["has_min_num_of_reads"] = results[file_key]["has_min_num_of_reads"]
     size_check["summary"]["num_of_reads"] = results[file_key]["num_of_reads"]
 

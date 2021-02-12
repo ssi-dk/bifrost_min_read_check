@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [v2_2_6] - 2021-02-12
+### Notes
+Fix bug missing num of reads in report
+### Changed
+- bifrost_min_read_check/datadump.py
+
 ## [v2_2_5] - 2021-02-11
 ### Notes
 Update dependencies bifrostlib to 2.1.5
