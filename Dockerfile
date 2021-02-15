@@ -12,21 +12,20 @@ FROM continuumio/miniconda3:4.8.2 as build_base
 ONBUILD ARG BIFROST_COMPONENT_NAME
 ONBUILD ARG BUILD_ENV
 ONBUILD ARG MAINTAINER
-LABEL \
+ONBUILD LABEL \
     BIFROST_COMPONENT_NAME=${BIFROST_COMPONENT_NAME} \
     description="Docker environment for ${BIFROST_COMPONENT_NAME}" \
     environment="${BUILD_ENV}" \
     maintainer="${MAINTAINER}"
-RUN \
+ONBUILD RUN \
     conda install -yq -c conda-forge -c bioconda -c default snakemake-minimal==5.7.1; \
     conda install -yq -c conda-forge -c bioconda -c default bbmap==38.58; 
 
 #---------------------------------------------------------------------------------------------------
 # Base for dev environement
 #---------------------------------------------------------------------------------------------------
-FROM continuumio/miniconda3:4.8.2 as build_dev
+FROM build_base as build_dev
 ONBUILD ARG BIFROST_COMPONENT_NAME
-ONBUILD COPY --from=build_base / /
 ONBUILD COPY /components/${BIFROST_COMPONENT_NAME} /bifrost/components/${BIFROST_COMPONENT_NAME}
 ONBUILD COPY /lib/bifrostlib /bifrost/lib/bifrostlib
 ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}/
@@ -38,9 +37,8 @@ ONBUILD RUN \
 #---------------------------------------------------------------------------------------------------
 # Base for production environment
 #---------------------------------------------------------------------------------------------------
-FROM continuumio/miniconda3:4.8.2 as build_prod
+FROM build_base as build_prod
 ONBUILD ARG BIFROST_COMPONENT_NAME
-ONBUILD COPY --from=build_base / /
 ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
 ONBUILD COPY ./ ./
 ONBUILD RUN \
@@ -50,9 +48,8 @@ ONBUILD RUN \
 # Base for test environment (prod with tests)
 #---------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
-FROM continuumio/miniconda3:4.8.2 as build_test
+FROM build_base as build_test
 ONBUILD ARG BIFROST_COMPONENT_NAME
-ONBUILD COPY --from=build_base / /
 ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
 ONBUILD COPY ./ ./
 ONBUILD RUN \
@@ -64,7 +61,7 @@ ONBUILD RUN \
 # Additional resources
 #---------------------------------------------------------------------------------------------------
 FROM build_${BUILD_ENV}
-ONBUILD ARG BIFROST_COMPONENT_NAME
+ARG BIFROST_COMPONENT_NAME
 # NA
 
 #---------------------------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ setup(
     author_email="kimn@ssi.dk",
     packages=find_packages(),
     install_requires=[
-        'bifrostlib >= 2.1.5',
+        'bifrostlib >= 2.1.7',
     ],
     package_data={"bifrost_min_read_check": ['config.yaml']},
     include_package_data=True
