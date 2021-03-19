@@ -40,7 +40,6 @@ ONBUILD RUN \
 FROM build_base as build_prod
 ONBUILD ARG BIFROST_COMPONENT_NAME
 ONBUILD WORKDIR /bifrost/components/${BIFROST_COMPONENT_NAME}
-ONBUILD COPY ./ ./
 ONBUILD RUN \
     pip install -e file:///bifrost/components/${BIFROST_COMPONENT_NAME}/
 
