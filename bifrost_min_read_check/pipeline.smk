@@ -36,6 +36,10 @@ onerror:
     if samplecomponent['status'] == "Running":
         common.set_status_and_save(sample, samplecomponent, "Failure")
 
+envvars:
+    "BIFROST_INSTALL_DIR",
+    "CONDA_PREFIX"
+
 rule all:
     input:
         # file is defined by datadump function
@@ -91,9 +95,10 @@ rule setup__filter_reads_with_bbduk:
     output:
         stats_file = f"{component['name']}/stats.txt"
     params:
-        adapters = component['resources']['adapters_fasta']  # This is now done to the root of the continuum container
+        conda_env_path = f"{os.environ['CONDA_PREFIX']}",
+        adapters = f"{os.environ['BIFROST_INSTALL_DIR']}/bifrost/components/bifrost_{component['display_name']}/{component['resources']['adapters_fasta']}"
     shell:
-        "java -ea -cp /opt/conda/opt/bbmap-38.58-0/current/ jgi.BBDuk in={input.reads[0]} in2={input.reads[1]} ref={params.adapters} ktrim=r k=23 mink=11 hdist=1 tbo qtrim=r minlength=30 1> {log.out_file} 2> {output.stats_file}"
+        "java -ea -cp {params.conda_env_path}/opt/bbmap-38.58-0/current/ jgi.BBDuk in={input.reads[0]} in2={input.reads[1]} ref={params.adapters} ktrim=r k=23 mink=11 hdist=1 tbo qtrim=r minlength=30 1> {log.out_file} 2> {output.stats_file}"
 
 
 rule_name = "greater_than_min_reads_check"
