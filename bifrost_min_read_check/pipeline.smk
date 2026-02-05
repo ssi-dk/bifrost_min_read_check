@@ -80,8 +80,9 @@ rule check_requirements:
 #- Templated section: end --------------------------------------------------------------------------
 
 #* Dynamic section: start **************************************************************************
-rule_name = "setup__filter_reads_with_bbduk"
-rule setup__filter_reads_with_bbduk:
+
+rule_name = "setup__filter_reads_with_fastp"
+rule setup__filter_reads_with_fastp:
     message:
         f"Running step:{rule_name}"
     log:
@@ -93,13 +94,12 @@ rule setup__filter_reads_with_bbduk:
         rules.check_requirements.output.check_file,
         reads = sample['categories']['paired_reads']['summary']['data']
     output:
-        stats_file = f"{component['name']}/stats.txt"
+        filtered_reads = [f"{sample['name']}.R1.trim.fastq.gz", f"{sample['name']}.R2.trim.fastq.gz"]
+    threads: 8
     params:
-        conda_env_path = f"{os.environ['CONDA_PREFIX']}",
-        adapters = f"{os.environ['BIFROST_INSTALL_DIR']}/bifrost/components/bifrost_{component['display_name']}/{component['resources']['adapters_fasta']}"
+        options = "-q 30 -e 30 -l 30 -y 30"
     shell:
-        "java -ea -cp {params.conda_env_path}/opt/bbmap-38.58-0/current/ jgi.BBDuk in={input.reads[0]} in2={input.reads[1]} ref={params.adapters} ktrim=r k=23 mink=11 hdist=1 tbo qtrim=r minlength=30 1> {log.out_file} 2> {output.stats_file}"
-
+        "fastp --in1 {input.reads[0]} --in2 {input.reads[1]} --out1 {output.filtered_reads[0]} --out2 {output.filtered_reads[1]} --threads {threads} {params.options}"
 
 rule_name = "greater_than_min_reads_check"
 rule greater_than_min_reads_check:
@@ -111,13 +111,22 @@ rule greater_than_min_reads_check:
     benchmark:
         f"{component['name']}/benchmarks/{rule_name}.benchmark"
     input:
-        stats_file = rules.setup__filter_reads_with_bbduk.output.stats_file,
+        reads = rules.setup__filter_reads_with_fastp.output.filtered_reads
     params:
         component_json = component.json
+        min_reads_threshold = 10000        
     output:
         _file = f"{component['name']}/has_min_num_of_reads"
-    script:
-        os.path.join(os.path.dirname(workflow.snakefile), "rule__greater_than_min_reads_check.py")
+    shell:
+        """
+        if [[ $(zcat {input.reads} | grep -c '@' | tee {output._file}.tmp) > {params.min_reads_threshold} ]] ; then 
+            echo "Has min number of reads" > {log.out_file}
+            mv {output._file}.tmp {output._file}
+        else
+            echo "Found less than {params.min_reads_threshold} reads." > {log.err_file}
+        fi
+        """
+
 #* Dynamic section: end ****************************************************************************
 
 #- Templated section: start ------------------------------------------------------------------------
