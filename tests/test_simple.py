@@ -22,7 +22,7 @@ def test_cwd():
 
 
 class TestBifrostMinReadCheck:
-    component_name = "min_read_check__v2.2.8"
+    component_name = "min_read_check__v2.2.9"
 
     bifrost_install_dir = os.environ["BIFROST_INSTALL_DIR"]
 
