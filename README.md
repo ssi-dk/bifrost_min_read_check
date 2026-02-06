@@ -19,3 +19,19 @@ in rule greater_than_min_reads_check it will ensure all the trimmed reads have m
 specified in {params.min_reads_threshold}
 ```
 
+# data storage
+The input are the received adapter trimmed sequences which are present in this component collection in the database
+```
+sample['categories']['paired_reads']['summary']['data']
+```
+The output are the quality trimmed sequences used throughout all of the remaining components, stored within
+
+```
+sample['categories']['paired_reads']["summary"]["trimmed"]
+```
+
+# Rerun this sole component as a module for dev/test
+```
+snakemake --nolock --cores all -s path/bifrost_min_read_check/bifrost_min_read_check/pipeline.smk --config sample_name=sample_id component_name=min_read_check__v2.2.8
+```
+

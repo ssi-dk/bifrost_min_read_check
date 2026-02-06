@@ -81,6 +81,8 @@ rule check_requirements:
 
 #* Dynamic section: start **************************************************************************
 
+# conda:
+# "../env/read_check.yaml"
 rule_name = "setup__filter_reads_with_fastp"
 rule setup__filter_reads_with_fastp:
     message:
@@ -102,6 +104,7 @@ rule setup__filter_reads_with_fastp:
         "fastp --in1 {input.reads[0]} --in2 {input.reads[1]} --out1 {output.filtered_reads[0]} --out2 {output.filtered_reads[1]} --threads {threads} {params.options}"
 
 rule_name = "greater_than_min_reads_check"
+
 rule greater_than_min_reads_check:
     message:
         f"Running step:{rule_name}"
