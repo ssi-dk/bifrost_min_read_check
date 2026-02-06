@@ -1,15 +1,21 @@
 # bifrost_min_read_check
 
-This component is run given a sample id already added into the bifrostDB.From this it'll pull the paired_reads and run a check to ensure that the raw data has a minimum set of reads as to allow other programs in the workflow to work. The output of this is a simple boolean on if it 'has_min_num_of_reads'
+The input data to this initial component will already be adapter trimmed, so this component when given a sample id and requirements checks will perform additional trimming of the received sequencing files - nucleotide quality trimming - low complexity reads and so on. 
 
-## Programs: (see Dockerfile) 
+## Nucleotide quality trimming (see pipeline.smk)
 ```
-snakemake-minimal==5.7.1; \
-bbmap==38.58; 
+fastp --in1 xx --in2 xx --out1 xx --out2 xx --threads xx -q 30 -e 30 -l 30 -y 30
+```
+### the parameters as taken from the fastp documentation (https://github.com/OpenGene/fastp)
+```
+-q, --qualified_quality_phred      the quality value that a base is qualified. Default 15 means phred quality >=Q15 is qualified. (int [=15])
+-e, --average_qual                 if one read's average quality score <avg_qual, then this read/pair is discarded. Default 0 means no requirement (int [=0])
+-l, --length_required              reads shorter than length_required will be discarded, default is 15. (int [=15])
+-y, --low_complexity_filter          enable low complexity filter. The complexity is defined as the percentage of base that is different from its next base (base[i] != base[i+1]).
+```
+## Check number of reads (see pipeline.smk and config.yaml)
+in rule greater_than_min_reads_check it will ensure all the trimmed reads have more than 10000 reads, if not it will be discarded
+```
+specified in {params.min_reads_threshold}
 ```
 
-## Summary of c run: (see pipeline.smk and config.yaml)
-```
-java -ea -cp /opt/conda/opt/bbmap-38.58-0/current/ jgi.BBDuk in={input.reads[0]} in2={input.reads[1]} ref={params.adapters} ktrim=r k=23 mink=11 hdist=1 tbo qtrim=r minlength=30 1> {log.out_file} 2> {output.stats_file}
-rule__greater_than_min_reads_check.py
-```
