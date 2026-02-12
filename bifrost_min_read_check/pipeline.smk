@@ -96,12 +96,17 @@ rule setup__filter_reads_with_fastp:
         rules.check_requirements.output.check_file,
         reads = sample['categories']['paired_reads']['summary']['data']
     output:
-        filtered_reads = [f"{sample['name']}.R1.trim.fastq.gz", f"{sample['name']}.R2.trim.fastq.gz"]
+        filtered_reads = [
+        	       f"{component['name']}/{sample['name']}.R1.trim.fastq.gz",
+        	       f"{component['name']}/{sample['name']}.R2.trim.fastq.gz",
+		       ]
     threads: 8
     params:
         options = "-q 30 -e 30 -l 30 -y 30"
     shell:
-        "fastp --in1 {input.reads[0]} --in2 {input.reads[1]} --out1 {output.filtered_reads[0]} --out2 {output.filtered_reads[1]} --threads {threads} {params.options}"
+        """
+	fastp --in1 {input.reads[0]} --in2 {input.reads[1]} --out1 {output.filtered_reads[0]} --out2 {output.filtered_reads[1]} --thread {threads} {params.options} >> {log.out_file} 2>&1
+	"""
 
 rule_name = "greater_than_min_reads_check"
 
@@ -116,18 +121,29 @@ rule greater_than_min_reads_check:
     input:
         reads = rules.setup__filter_reads_with_fastp.output.filtered_reads
     params:
-        component_json = component.json
         min_reads_threshold = 10000        
     output:
         _file = f"{component['name']}/has_min_num_of_reads"
     shell:
-        """
-        if [[ $(zcat {input.reads} | grep -c '@' | tee {output._file}.tmp) > {params.min_reads_threshold} ]] ; then 
-            echo "Has min number of reads" > {log.out_file}
-            mv {output._file}.tmp {output._file}
-        else
-            echo "Found less than {params.min_reads_threshold} reads." > {log.err_file}
-        fi
+        r"""
+	set -euo pipefail
+
+	# Count reads in R1 (FASTQ: 4 lines per read)
+	num_reads=$(zcat {input.reads[0]} | awk 'END {{ print int(NR/4) }}')
+
+	if [[ "$num_reads" -gt {params.min_reads_threshold} ]]; then
+	   has_min="True"
+	   echo "Has min number of reads (num_reads=$num_reads)" > {log.out_file}
+	else
+	   has_min="False"
+           echo "Found less than {params.min_reads_threshold} reads (num_reads=$num_reads)." > {log.err_file}
+	fi
+	
+	echo "has_min_num_of_reads:$has_min" > {output._file}.tmp
+	echo "num_of_reads:$num_reads" >> {output._file}.tmp
+
+	mv {output._file}.tmp {output._file}	
+ 
         """
 
 #* Dynamic section: end ****************************************************************************
