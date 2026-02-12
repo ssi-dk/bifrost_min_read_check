@@ -3,7 +3,7 @@ from bifrostlib.datahandling import Sample
 from bifrostlib.datahandling import SampleComponentReference
 from bifrostlib.datahandling import SampleComponent
 from bifrostlib.datahandling import Category
-from typing import Dict
+from typing import Dict, List
 import os
 
 
@@ -25,11 +25,24 @@ def extract_has_min_num_of_reads(
     ]
     size_check["summary"]["num_of_reads"] = results[file_key]["num_of_reads"]
 
+def set_trimmed_reads_category(trimmed_reads: Category, trimmed_paths: List[str]) -> None:
+    """
+    Store trimmed FASTQ paths. Keep it simple: R1/R2 in summary.
+    """
+    # Normalize to strings (Snakemake gives plain strings already, but safe)
+    trimmed_R1 = str(trimmed_paths[0]) if len(trimmed_paths) > 0 else None
+    trimmed_R2 = str(trimmed_paths[1]) if len(trimmed_paths) > 1 else None
 
-def datadump(samplecomponent_ref_json: Dict):
+    trimmed_reads["summary"]["data"] = [p for p in [trimmed_R1, trimmed_R2] if p is not None]
+    trimmed_reads["summary"]["trimmed_R1"] = trimmed_R1
+    trimmed_reads["summary"]["trimmed_R2"] = trimmed_R2
+    
+def datadump(samplecomponent_ref_json: Dict, trimmed_reads_paths: List[str]):
     samplecomponent_ref = SampleComponentReference(value=samplecomponent_ref_json)
     samplecomponent = SampleComponent.load(samplecomponent_ref)
     sample = Sample.load(samplecomponent.sample)
+
+    # ---- size_check category ----
     size_check = samplecomponent.get_category("size_check")
     if size_check is None:
         size_check = Category(
@@ -43,11 +56,33 @@ def datadump(samplecomponent_ref_json: Dict):
                 "report": {},
             }
         )
+    
     extract_has_min_num_of_reads(
         size_check, samplecomponent["results"], samplecomponent["component"]["name"]
     )
     samplecomponent.set_category(size_check)
     sample.set_category(size_check)
+
+    # ---- trimmed_reads category (new) ----
+    trimmed_reads = samplecomponent.get_category("trimmed_reads")
+    if trimmed_reads is None:
+        trimmed_reads = Category(
+            value={
+                "name": "trimmed_reads",
+                "component": {
+                    "id": samplecomponent["component"]["_id"],
+                    "name": samplecomponent["component"]["name"],
+                },
+                "summary": {},
+                "report": {},
+            }
+        )
+
+    set_trimmed_reads_category(trimmed_reads, trimmed_reads_paths)
+    samplecomponent.set_category(trimmed_reads)
+    sample.set_category(trimmed_reads)
+
+    #save status
     common.set_status_and_save(sample, samplecomponent, "Success")
 
     with open(
@@ -60,4 +95,5 @@ def datadump(samplecomponent_ref_json: Dict):
 
 datadump(
     snakemake.params.samplecomponent_ref_json,
+    snakemake.params.trimmed_reads_paths
 )

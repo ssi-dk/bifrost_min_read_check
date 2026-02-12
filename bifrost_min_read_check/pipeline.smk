@@ -160,12 +160,14 @@ rule datadump:
         f"{component['name']}/benchmarks/{rule_name}.benchmark"
     input:
         #* Dynamic section: start ******************************************************************
-        rules.greater_than_min_reads_check.output._file  # Needs to be output of final rule
-        #* Dynamic section: end ********************************************************************
+        rules.greater_than_min_reads_check.output._file,  # Needs to be output of final rule
+	rules.setup__filter_reads_with_fastp.output.filtered_reads
+	#* Dynamic section: end ********************************************************************
     output:
         complete = rules.all.input
     params:
-        samplecomponent_ref_json = samplecomponent.to_reference().json
+        samplecomponent_ref_json = samplecomponent.to_reference().json,
+	trimmed_reads_paths = rules.setup__filter_reads_with_fastp.output.filtered_reads
     script:
         os.path.join(os.path.dirname(workflow.snakefile), "datadump.py")
 #- Templated section: end --------------------------------------------------------------------------
