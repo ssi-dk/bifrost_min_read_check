@@ -11,6 +11,8 @@ from bifrostlib.datahandling import Component
 from bifrostlib.datahandling import SampleComponentReference
 from bifrostlib.datahandling import SampleComponent
 
+import datetime
+
 os.umask(0o2)
 
 try:
@@ -67,7 +69,7 @@ rule all:
 
 rule set_time_start:
     output:
-        start_file = temp(f"{component['name']}/time_start.txt")
+        start_file = f"{component['name']}/time_start.txt"
     run:
         import time
         with open(output.start_file, "w") as fh:
@@ -77,7 +79,7 @@ rule setup:
     input:
         rules.set_time_start.output.start_file
     output:
-        init_file = touch(temp(f"{component['name']}/initialized"))
+        init_file = touch(f"{component['name']}/initialized")
     run:
         samplecomponent['path'] = os.path.join(os.getcwd(), component['name'])
         samplecomponent.save()
@@ -94,13 +96,11 @@ rule check_requirements:
     input:
         folder = rules.setup.output.init_file,
     output:
-        check_file = f"{component['name']}/requirements_met",
-    params:
-        samplecomponent
+        check_file = touch(f"{component['name']}/requirements_met")
     run:
         if samplecomponent.has_requirements():
-            with open(output.check_file, "w") as fh:
-                fh.write("")
+            #No need to write anything as the output is using touch to create the flag used to check the requirements
+            pass
 
 #* Dynamic section: start **************************************************************************
 
@@ -120,17 +120,23 @@ rule setup__filter_reads_with_fastp:
         filtered_reads = [
             f"{component['name']}/{sample['name']}.R1.trim.fastq.gz",
             f"{component['name']}/{sample['name']}.R2.trim.fastq.gz",
-        ]
-    threads: 8
+        ],
+        threads_file = f"{component['name']}/threads_used.txt",	
+        tool_version = f"{component['name']}/tool_version.txt"
     params:
-        options = "-q 30 -e 30 -l 30 -y 30"
+        options = "-q 30 -e 30 -l 30 -y 30",
+        threads = 8
     shell:
         """
         fastp --in1 {input.reads[0]} --in2 {input.reads[1]} \
               --out1 {output.filtered_reads[0]} \
               --out2 {output.filtered_reads[1]} \
-              --thread {threads} {params.options} \
+              --thread {params.threads} {params.options} \
               >> {log.out_file} 2>&1
+        
+        echo {params.threads} > {output.threads_file}
+        
+        fastp -v > {output.tool_version} 2>&1
         """
 
 rule_name = "greater_than_min_reads_check"
@@ -178,33 +184,76 @@ rule set_time_end:
         with open(output.end_file, "w") as fh:
             fh.write(str(time.time()))
 
-rule compute_runtime:
+rule_name = "git_version"
+rule git_version:
+    message:
+        f"Running step:{rule_name}"
+    log:
+        out_file = f"{component['name']}/log/{rule_name}.out.log",
+        err_file = f"{component['name']}/log/{rule_name}.err.log",
+    benchmark:
+        f"{component['name']}/benchmarks/{rule_name}.benchmark"
+    input:
+        rules.setup.output.init_file
+    output:
+        git_hash = f"{component['name']}/git_hash.txt"
+    run:
+        import subprocess, os
+
+        snake_dir = os.path.dirname(workflow.snakefile)
+
+        # Best effort: get commit hash; if not a git repo, write "-"
+        try:
+            git_hash = subprocess.check_output(
+                ["git", "-C", snake_dir, "rev-parse", "HEAD"],
+                stderr=subprocess.STDOUT,
+                text=True
+            ).strip()
+        except Exception as e:
+            git_hash = "-"
+            os.makedirs(os.path.dirname(log.err_file), exist_ok=True)
+            with open(log.err_file, "a") as fh:
+                fh.write(f"[git_version] Could not determine git hash from {snake_dir}: {e}\n")
+
+        with open(output.git_hash, "w") as fh:
+            fh.write(str(git_hash))
+
+rule dump_info:
     input:
         start_file = rules.set_time_start.output.start_file,
-        end_file = rules.set_time_end.output.end_file
+        end_file = rules.set_time_end.output.end_file,
+        threads_file = rules.setup__filter_reads_with_fastp.output.threads_file,
+        spades_version = rules.setup__filter_reads_with_fastp.output.tool_version,
+        git_hash = rules.git_version.output.git_hash
     output:
-        runtime_flag = temp(f"{component['name']}/runtime_set")
+        runtime_flag = touch(f"{component['name']}/runtime_set")
     run:
         import time
-        from bifrostlib.datahandling import SampleComponentReference, SampleComponent
+        from bifrostlib.datahandling import SampleComponent
 
-        # Load timestamps
         with open(input.start_file) as fh:
             t_start = float(fh.read().strip())
-
         with open(input.end_file) as fh:
             t_end = float(fh.read().strip())
-
+        with open(input.threads_file) as fh:
+            threads_used = int(fh.read().strip())
+        with open(input.spades_version) as fh:
+            spades_version = str(fh.read().rstrip("\n"))
+        with open(input.git_hash) as fh:
+            git_hash = str(fh.read().strip())
+	
         runtime_minutes = (t_end - t_start) / 60.0
-	print(f"runtime in minutes {runtime_minutes}")
+        print(f"runtime in minutes {runtime_minutes}")
 
-        # Save to SampleComponent
         sc = SampleComponent.load(samplecomponent.to_reference())
+        sc["time_start"] = datetime.datetime.fromtimestamp(t_start).strftime("%Y-%m-%d %H:%M:%S")
+        sc["time_end"] = datetime.datetime.fromtimestamp(t_end).strftime("%Y-%m-%d %H:%M:%S")
         sc["time_running"] = round(runtime_minutes, 3)
+        sc["threads_used"] = threads_used
+        sc["tool_version"] = spades_version
+        sc["git_hash"] = git_hash
+	
         sc.save()
-
-        with open(output.runtime_flag, "w") as fh:
-            fh.write("done")
 
 # -------------------------------------------------------------------------
 # DATADUMP
@@ -221,12 +270,11 @@ rule datadump:
         f"{component['name']}/benchmarks/{rule_name}.benchmark"
     input:
         rules.greater_than_min_reads_check.output._file,
-        rules.setup__filter_reads_with_fastp.output.filtered_reads,
-        rules.compute_runtime.output.runtime_flag
+        rules.dump_info.output.runtime_flag
     output:
         complete = f"{component['name']}/datadump_complete"
     params:
-        samplecomponent_ref_json = samplecomponent.to_reference().json,
+        samplecomponent_id = samplecomponent["_id"],
         trimmed_reads_paths = rules.setup__filter_reads_with_fastp.output.filtered_reads
     script:
         os.path.join(os.path.dirname(workflow.snakefile), "datadump.py")

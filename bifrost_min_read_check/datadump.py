@@ -33,8 +33,9 @@ def set_trimmed_reads_category(trimmed_reads: Category, trimmed_paths: List[str]
     trimmed_reads["summary"]["trimmed_R2"] = trimmed_R2
 
 
-def datadump(samplecomponent_ref_json: Dict, trimmed_reads_paths: List[str]):
-    samplecomponent_ref = SampleComponentReference(value=samplecomponent_ref_json)
+def datadump(samplecomponent_id: str, trimmed_reads_paths: List[str]):
+    #samplecomponent_ref = SampleComponentReference(value=samplecomponent_ref_json)
+    samplecomponent_ref = SampleComponentReference(_id=samplecomponent_id)
     samplecomponent = SampleComponent.load(samplecomponent_ref)
     sample = Sample.load(samplecomponent.sample)
 
@@ -86,6 +87,6 @@ def datadump(samplecomponent_ref_json: Dict, trimmed_reads_paths: List[str]):
 
 # Snakemake call
 datadump(
-    snakemake.params.samplecomponent_ref_json,
+    snakemake.params.samplecomponent_id,
     snakemake.params.trimmed_reads_paths
 )
