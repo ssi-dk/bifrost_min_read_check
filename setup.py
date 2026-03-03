@@ -2,7 +2,7 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name="bifrost_min_read_check",
-    version="2.2.8",
+    version="2.2.10",
     description="Datahandling functions for bifrost (later to be API interface)",
     url="https://github.com/ssi-dk/bifrost_min_read_check",
     author="Kim Ng, Martin Basterrechea",
