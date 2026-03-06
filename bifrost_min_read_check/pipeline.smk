@@ -51,7 +51,10 @@ onerror:
 
 envvars:
     "BIFROST_INSTALL_DIR",
-    "CONDA_PREFIX"
+    "CONDA_PREFIX",
+    "BIFROST_JOB_CPUS",
+
+JOB_CPUS = int(os.environ.get("BIFROST_JOB_CPUS", 1))
 
 # -------------------------------------------------------------------------
 # MAIN RULES FIRST
@@ -125,7 +128,7 @@ rule setup__filter_reads_with_fastp:
         tool_version = f"{component['name']}/tool_version.txt"
     params:
         options = "-q 30 -e 30 -l 30 -y 30",
-        threads = 8
+        threads = JOB_CPUS
     shell:
         """
         fastp --in1 {input.reads[0]} --in2 {input.reads[1]} \
